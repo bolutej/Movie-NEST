@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie App</title>
+    <link rel="stylesheet" href="style.css" />
+    <script
+      src="https://kit.fontawesome.com/a49d5f4a5c.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="container">
+      <nav>
+        <h2 onclick="location.reload()">MOVIES & TV APP</h2>
+        <i class="fa-solid fa-sun" id="swap"></i>
+      </nav>
+      <form id="search-form">
+        <input type="text" id="search-box" placeholder="Search Movies" />
+        <button><i class="fa-solid fa-magnifying-glass"></i></button>
+        <div id="suggestions"></div>
+      </form>
+      <div class="filters">
+        <select id="rating-filter">
+          <option value="0">All Ratings</option>
+          <option value="8">8+ Star Excellent</option>
+          <option value="7">7+ Star Good</option>
+          <option value="5">5+ Star Average</option>
+          <option value="3">3+ Star Below Average</option>
+        </select>
+      </div>
+      <div class="S">
+        <h3 id="searchH3"></h3>
+        <div id="searchMov"></div>
+        <!-- <button id="showMore">Show more</button>     -->
+      </div>
+
+      <div class="T">
+        <h3>Trending Movies:</h3>
+        <div id="trending"></div>
+        <button id="show-more-trending">Show More</button>
+      </div>
+      <div class="U">
+        <h3>Upcoming Movies:</h3>
+        <div id="upcoming"></div>
+        <button id="show-more-upcoming">Show More</button>
+      </div>
+      <div class="C">
+        <h3>Comedy Movies:</h3>
+        <div id="comedy"></div>
+        <button id="show-more-comedy">Show More</button>
+      </div>
+      <div class="H">
+        <h3>Horror Movies:</h3>
+        <div id="horror"></div>
+        <button id="show-more-horror">Show More</button>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p class="site-footer__title">MOVIES & TV APP</p>
+        <p class="site-footer__name">Made by boluTej</p>
+        <a
+          class="site-footer__twitter"
+          href="https://twitter.com/BoluTejumola"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Twitter: @BoluTejumola</a
+        >
+      </div>
+    </footer>
+
+    <div id="movie-modal" class="movie-modal" aria-hidden="true">
+      <div class="movie-modal__backdrop" data-close-modal></div>
+      <div
+        class="movie-modal__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        <button id="close-modal" class="movie-modal__close" type="button">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
+
+
