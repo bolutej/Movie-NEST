@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movie App</title>
+    <title>Marquee</title>
+    <link rel="icon" href="favicon.ico?v=3" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=3" />
+    <link rel="apple-touch-icon" href="favicon.png?v=3" />
+    <link rel="shortcut icon" href="favicon.ico?v=3" />
     <link rel="stylesheet" href="style.css" />
     <script
       src="https://kit.fontawesome.com/a49d5f4a5c.js"
@@ -13,7 +18,10 @@
   <body>
     <div class="container">
       <nav>
-        <h2 onclick="location.reload()">MOVIES & TV APP</h2>
+        <h2 onclick="location.reload()">
+          <img src="favicon.svg" alt="Marquee logo" class="brand-logo" />
+          <span>MARQUEE</span>
+        </h2>
         <i class="fa-solid fa-sun" id="swap"></i>
       </nav>
       <form id="search-form">
@@ -30,47 +38,84 @@
           <option value="3">3+ Star Below Average</option>
         </select>
       </div>
+      <div id="movies-loader" class="movies-loader" aria-live="polite">
+        <span class="movies-loader__spinner" aria-hidden="true"></span>
+        <p>Loading movies...</p>
+      </div>
       <div class="S">
         <h3 id="searchH3"></h3>
+        <div id="search-loader" class="movies-loader search-loader" aria-live="polite">
+          <span class="movies-loader__spinner" aria-hidden="true"></span>
+          <p>Searching movies...</p>
+        </div>
         <div id="searchMov"></div>
-        <!-- <button id="showMore">Show more</button>     -->
+        <div id="search-sentinel"></div>
       </div>
 
       <div class="T">
         <h3>Trending Movies:</h3>
-        <div id="trending"></div>
-        <button id="show-more-trending">Show More</button>
+        <div id="trending" class="carousel">
+          <!-- movies + sentinel go here, injected by JS -->
+        </div>
       </div>
       <div class="U">
         <h3>Upcoming Movies:</h3>
-        <div id="upcoming"></div>
-        <button id="show-more-upcoming">Show More</button>
+        <div id="upcoming" class="carousel"></div>
       </div>
       <div class="C">
         <h3>Comedy Movies:</h3>
-        <div id="comedy"></div>
-        <button id="show-more-comedy">Show More</button>
+        <div id="comedy" class="carousel"></div>
       </div>
       <div class="H">
         <h3>Horror Movies:</h3>
-        <div id="horror"></div>
-        <button id="show-more-horror">Show More</button>
+        <div id="horror" class="carousel"></div>
       </div>
     </div>
 
     <footer class="site-footer">
-      <div class="site-footer__inner">
-        <p class="site-footer__title">MOVIES & TV APP</p>
-        <p class="site-footer__name">Made by boluTej</p>
-        <a
-          class="site-footer__twitter"
-          href="https://twitter.com/BoluTejumola"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Twitter: @BoluTejumola</a
+  <div class="site-footer__inner">
+    <p class="site-footer__copy">&copy; 2026 Marquee. All rights reserved.</p>
+    <div class="site-footer__links">
+      <a
+        class="site-footer__link"
+        href="https://bolutej.vercel.app"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Built by</a
+      >
+      <a
+        class="site-footer__twitter"
+        href="https://bolutej.vercel.app"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Bolu.dev</a
+      >
+      <span class="site-footer__dot">&bull;</span>
+      <a class="site-footer__link" href="mailto:support@marquee.app">Contact</a>
+      <span class="site-footer__dot">&bull;</span>
+      <a
+        class="site-footer__icon"
+        href="https://twitter.com/BoluTejumola"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="X (Twitter)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
         >
-      </div>
-    </footer>
+          <path
+            d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+          />
+        </svg>
+      </a>
+    </div>
+  </div>
+</footer>
 
     <div id="movie-modal" class="movie-modal" aria-hidden="true">
       <div class="movie-modal__backdrop" data-close-modal></div>
@@ -89,5 +134,4 @@
     <script src="script.js"></script>
   </body>
 </html>
-
 

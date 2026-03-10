@@ -59,11 +59,20 @@ nav {
 }
 
 nav h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: "Sora", sans-serif;
   font-size: clamp(1.05rem, 2.6vw, 1.6rem);
   letter-spacing: 0.07em;
   color: var(--text);
   cursor: pointer;
+}
+
+.brand-logo {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
 #swap {
@@ -171,6 +180,47 @@ select:focus {
   border-color: var(--brand);
 }
 
+.movies-loader {
+  width: min(760px, 100%);
+  margin: 12px auto 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--field-bg);
+  color: var(--muted);
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.movies-loader.show {
+  display: flex;
+}
+
+.movies-loader p {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.movies-loader__spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--line);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: movies-loader-spin 0.85s linear infinite;
+}
+
+@keyframes movies-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.search-loader {
+  margin-top: 10px;
+}
+
 .S,
 .T,
 .U,
@@ -203,11 +253,34 @@ select:focus {
   gap: 16px;
 }
 
+#trending,
+#upcoming,
+#comedy,
+#horror {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.scroll-sentinel {
+  flex: 0 0 0;
+  width: 0;
+  height: 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 #searchMov > div,
-#trending > div,
-#upcoming > div,
-#comedy > div,
-#horror > div {
+#trending > div:not(.scroll-sentinel),
+#upcoming > div:not(.scroll-sentinel),
+#comedy > div:not(.scroll-sentinel),
+#horror > div:not(.scroll-sentinel) {
   background: linear-gradient(170deg, var(--surface), var(--surface-2));
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -216,10 +289,10 @@ select:focus {
 }
 
 #searchMov > div:hover,
-#trending > div:hover,
-#upcoming > div:hover,
-#comedy > div:hover,
-#horror > div:hover {
+#trending > div:not(.scroll-sentinel):hover,
+#upcoming > div:not(.scroll-sentinel):hover,
+#comedy > div:not(.scroll-sentinel):hover,
+#horror > div:not(.scroll-sentinel):hover {
   transform: translateY(-5px);
   border-color: var(--brand);
 }
@@ -247,22 +320,10 @@ select:focus {
   color: var(--title);
 }
 
-#trending,
-#upcoming,
-#comedy,
-#horror {
-  display: flex;
-  gap: 14px;
-  overflow-x: auto;
-  padding-bottom: 6px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
-}
-
-#trending > div,
-#upcoming > div,
-#comedy > div,
-#horror > div {
+#trending > div:not(.scroll-sentinel),
+#upcoming > div:not(.scroll-sentinel),
+#comedy > div:not(.scroll-sentinel),
+#horror > div:not(.scroll-sentinel) {
   min-width: 185px;
   display: block;
 }
@@ -451,45 +512,76 @@ select:focus {
 .site-footer {
   margin-top: 44px;
   border-top: 1px solid var(--line);
-  background: rgba(5, 28, 19, 0.6);
+  background:
+    linear-gradient(90deg, rgba(6, 21, 15, 0.9), rgba(6, 21, 15, 0.6)),
+    radial-gradient(300px 60px at 5% 50%, rgba(79, 207, 97, 0.12), transparent);
 }
 
 .site-footer__inner {
   width: min(1240px, 94%);
   margin: 0 auto;
-  padding: 20px 0 24px;
+  padding: 18px 0 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
-.site-footer__title {
-  font-family: "Sora", sans-serif;
-  font-size: 1.02rem;
-  letter-spacing: 0.04em;
-  color: var(--title);
+.site-footer__copy {
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
 }
 
-.site-footer__name {
+.site-footer__links {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--muted);
-  font-weight: 700;
+  font-size: 0.85rem;
 }
 
 .site-footer__twitter {
   text-decoration: none;
-  color: var(--brand);
-  font-weight: 800;
+  color: var(--brand-strong);
+  font-weight: 700;
   border-bottom: 1px solid transparent;
 }
 
-.site-footer__twitter:hover {
+.site-footer__link {
+  text-decoration: none;
+  color: var(--muted);
+  border-bottom: 1px solid transparent;
+}
+
+.site-footer__twitter:hover,
+.site-footer__link:hover {
   border-bottom-color: var(--brand);
 }
 
 .darkmode .site-footer {
   background: rgba(232, 244, 237, 0.85);
+}
+
+.site-footer__dot {
+  color: var(--line);
+}
+
+.site-footer__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-strong);
+  text-decoration: none;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.site-footer__icon:hover {
+  color: var(--brand);
 }
 
 @media (max-width: 768px) {
@@ -523,5 +615,10 @@ select:focus {
   .site-footer__inner {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .site-footer__links {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }

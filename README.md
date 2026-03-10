@@ -1,37 +1,60 @@
-🎬 CineVault
-A movie discovery app built with vanilla JavaScript and the TMDB API.
+# Marquee Movie App
 
-UI designed with the help of Claude Codex — assisted with layout, dark mode, card styling, and responsive design.
+Marquee is a movie discovery web app powered by The Movie Database (TMDB) API.
+It lets users browse trending, upcoming, comedy, and horror movies, search titles,
+view movie details, and filter by minimum rating.
 
+## Features
 
-✨ Features
-FeatureDescription🔍 
-SearchLive suggestions as you type with debouncing
-🎞️ Banner sliding hero banner with trending movies
-📂 Categories Trending, Upcoming, Comedy, Horror
-⭐ Filter all sections by rating
-🎬  Modal popup
-🌙 Dark Mode Toggles 
+- Browse movie sections: Trending, Upcoming, Comedy, and Horror
+- Infinite scroll loading for category rows
+- Search movies with live autocomplete suggestions
+- Movie detail modal (rating, certification, genres, overview, and TMDB link)
+- Rating filter (`All`, `8+`, `7+`, `5+`, `3+`)
+- Dark/light mode toggle
+- Branded favicon and footer
+- Startup loading animation while initial movie data is fetched
 
-📁 File Structure
-CineVault/
-├── index.html    # Structure and layout
-├── style.css     # Styles, dark mode, grid, banner
-└── script.js     # API calls, DOM manipulation, events
+## Tech Stack
 
-🔑 Setup
+- HTML5
+- CSS3
+- Vanilla JavaScript (ES6+)
+- TMDB REST API
+- Font Awesome icons
 
-Get a free API key from themoviedb.org
-Replace in script.js:
+## Project Structure
 
-javascriptlet API_KEY = 'your_api_key_here';
+- `index.html` - page structure and sections
+- `style.css` - app styling, layout, theme, and animations
+- `script.js` - data fetching, rendering, search, modal, and infinite scroll
+- `favicon.svg` / `favicon.png` - app icon assets
 
-Open index.html in your browser — no build tools needed.
+## Setup
 
+1. Clone or download the project.
+2. Open the project folder in VS Code.
+3. Run with a local server (recommended), for example the Live Server extension.
 
-🛠️ Built With
+## Configuration
 
-Vanilla JavaScript, HTML5, CSS3
-TMDB API
-Font Awesome
-Claude Codex — UI assistance
+The TMDB API key is currently defined in `script.js`:
+
+```js
+const API_KEY = "your_api_key";
+```
+
+If you want to use your own key, replace the existing value with your TMDB API key.
+
+## Usage
+
+1. Open the app in your browser.
+2. Wait for the initial loading animation to complete.
+3. Browse categories or search for a movie.
+4. Click `View Details` to open the movie modal.
+5. Use the rating filter and theme toggle as needed.
+
+## Notes
+
+- Search results use infinite loading at the bottom sentinel.
+- Movie certifications are fetched from US release data when available.

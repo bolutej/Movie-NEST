@@ -1,32 +1,33 @@
-// Dom 
-let swap = document.getElementById("swap");
-let container = document.getElementsByClassName("container");
-let searchForm = document.getElementById("search-form");
-let searchBox = document.getElementById("search-box");
+// DOM elements
+const swap = document.getElementById("swap");
+const searchForm = document.getElementById("search-form");
+const searchBox = document.getElementById("search-box");
 
-let searchMov = document.getElementById("searchMov");
-let trending = document.getElementById("trending");
-let upcoming = document.getElementById("upcoming");
-let comedy = document.getElementById("comedy");
-let horror = document.getElementById("horror");
+const searchMov = document.getElementById("searchMov");
+const trending = document.getElementById("trending");
+const upcoming = document.getElementById("upcoming");
+const comedy = document.getElementById("comedy");
+const horror = document.getElementById("horror");
 
-let searchH3 = document.getElementById("searchH3");
-let T = document.querySelector(".T");
-let U = document.querySelector(".U");
-let C = document.querySelector(".C");
-let H = document.querySelector(".H");
+const searchH3 = document.getElementById("searchH3");
+const T = document.querySelector(".T");
+const U = document.querySelector(".U");
+const C = document.querySelector(".C");
+const H = document.querySelector(".H");
+const moviesLoader = document.getElementById("movies-loader");
+const searchLoader = document.getElementById("search-loader");
 
 // Modal Box
 const movieModal = document.getElementById("movie-modal");
 const modalContent = document.getElementById("modal-content");
 const closeModalBtn = document.getElementById("close-modal");
 
-// API 
-let API_KEY = "4831c138970a601533d8dbe21c30663d";
-let query = " ";
+// API
+const API_KEY = "4831c138970a601533d8dbe21c30663d";
 const POSTER_URL = "https://image.tmdb.org/t/p/w500";
 const MOVIE_URL = "https://www.themoviedb.org/movie/";
-let page = 1;
+const BASE_URL = "https://api.themoviedb.org/3";
+const seenByContainer = new WeakMap();
 
 // Theme toggle (dark/light)
 swap.addEventListener("click", () => {
@@ -34,7 +35,52 @@ swap.addEventListener("click", () => {
   document.querySelector("body").classList.toggle("darkmode");
 });
 
-const BASE_URL = "https://api.themoviedb.org/3";
+function showMoviesLoader() {
+  if (moviesLoader) {
+    moviesLoader.classList.add("show");
+  }
+}
+
+function hideMoviesLoader() {
+  if (moviesLoader) {
+    moviesLoader.classList.remove("show");
+    moviesLoader.textContent = "";
+    moviesLoader.style.display = "none";
+  }
+}
+
+function showSearchLoader() {
+  if (searchLoader) {
+    searchLoader.classList.add("show");
+  }
+}
+
+function hideSearchLoader() {
+  if (searchLoader) {
+    searchLoader.classList.remove("show");
+  }
+}
+
+function hideSuggestions() {
+  const suggestions = document.getElementById("suggestions");
+  if (suggestions) {
+    suggestions.innerHTML = "";
+    suggestions.style.display = "none";
+  }
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getSeenSet(container) {
+  let set = seenByContainer.get(container);
+  if (!set) {
+    set = new Set();
+    seenByContainer.set(container, set);
+  }
+  return set;
+}
 
 // open Movie Modal.
 function openMovieModal(movie, cert, movieGenres) {
@@ -90,11 +136,14 @@ let tMovies = [],
   cMovies = [],
   hMovies = [];
 
-// Number of items currently visible per section.
-let tVisible = 7,
-  uVisible = 7,
-  cVisible = 7,
-  hVisible = 7;
+// Pagination state
+const pageState = {
+  trending: { page: 1, loading: false, hasMore: true },
+  upcoming: { page: 1, loading: false, hasMore: true },
+  comedy: { page: 1, loading: false, hasMore: true },
+  horror: { page: 1, loading: false, hasMore: true },
+  search: { page: 1, loading: false, hasMore: true, query: "" },
+};
 
 // Active minimum rating selected by the user.
 let selectedRating = 0;
@@ -110,42 +159,37 @@ function getFilteredMovies(movies) {
   return movies.filter((movie) => movie.vote_average >= selectedRating);
 }
 
-// Re-render all content rows using current rating + visible counts.
+// Re-render all content rows using current rating filter.
 function filterByRating() {
-  displayMovies(getFilteredMovies(tMovies), tVisible, trending);
-  displayMovies(getFilteredMovies(uMovies), uVisible, upcoming);
-  displayMovies(getFilteredMovies(cMovies), cVisible, comedy);
-  displayMovies(getFilteredMovies(hMovies), hVisible, horror);
+  displayMovies(getFilteredMovies(tMovies), trending);
+  displayMovies(getFilteredMovies(uMovies), upcoming);
+  displayMovies(getFilteredMovies(cMovies), comedy);
+  displayMovies(getFilteredMovies(hMovies), horror);
 }
 
 // Fetches all home sections in parallel and renders initial cards.
 async function loadMovies() {
+  showMoviesLoader();
+
   try {
-    const [trendingData, upcomingData, comedyData, horrorData] =
-      await Promise.all([
-        fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`).then(
-          (res) => {
-            if (!res.ok) throw new Error(`Trending failed: ${res.status}`);
-            return res.json();
-          },
-        ),
-        fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}`).then((res) => {
-          if (!res.ok) throw new Error(`Upcoming failed: ${res.status}`);
-          return res.json();
-        }),
-        fetch(
-          `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=35`,
-        ).then((res) => {
-          if (!res.ok) throw new Error(`Upcoming failed: ${res.status}`);
-          return res.json();
-        }),
-        fetch(
-          `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=27`,
-        ).then((res) => {
-          if (!res.ok) throw new Error(`Upcoming failed: ${res.status}`);
-          return res.json();
-        }),
-      ]);
+    const [trendingData, upcomingData, comedyData, horrorData] = await Promise.all([
+      fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}&page=1`).then((res) => {
+        if (!res.ok) throw new Error(`Trending failed: ${res.status}`);
+        return res.json();
+      }),
+      fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}&page=1`).then((res) => {
+        if (!res.ok) throw new Error(`Upcoming failed: ${res.status}`);
+        return res.json();
+      }),
+      fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=35&page=1`).then((res) => {
+        if (!res.ok) throw new Error(`Comedy failed: ${res.status}`);
+        return res.json();
+      }),
+      fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=27&page=1`).then((res) => {
+        if (!res.ok) throw new Error(`Horror failed: ${res.status}`);
+        return res.json();
+      }),
+    ]);
 
     // store results
     tMovies = trendingData.results;
@@ -153,23 +197,67 @@ async function loadMovies() {
     cMovies = comedyData.results;
     hMovies = horrorData.results;
 
-    // display initial 6
-    displayMovies(tMovies, tVisible, trending);
-    displayMovies(uMovies, uVisible, upcoming);
-    displayMovies(cMovies, cVisible, comedy);
-    displayMovies(hMovies, hVisible, horror);
+    // display all fetched cards per section.
+    await Promise.all([
+      displayMovies(tMovies, trending),
+      displayMovies(uMovies, upcoming),
+      displayMovies(cMovies, comedy),
+      displayMovies(hMovies, horror),
+    ]);
+
+    setupInfiniteScroll("trending", trending);
+    setupInfiniteScroll("upcoming", upcoming);
+    setupInfiniteScroll("comedy", comedy);
+    setupInfiniteScroll("horror", horror);
   } catch (error) {
     console.error("Failed to load movies:", error);
     trending.innerHTML = "<p>Something went wrong. Please try again.</p>";
+  } finally {
+    hideMoviesLoader();
+  }
+}
+
+async function fetchMoreMovies(section) {
+  const state = pageState[section];
+  if (state.loading || !state.hasMore) return;
+
+  state.loading = true;
+  state.page++;
+
+  const urls = {
+    trending: `${BASE_URL}/trending/movie/day?api_key=${API_KEY}&page=${state.page}`,
+    upcoming: `${BASE_URL}/movie/upcoming?api_key=${API_KEY}&page=${state.page}`,
+    comedy: `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=35&page=${state.page}`,
+    horror: `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=27&page=${state.page}`,
+  };
+
+  try {
+    const res = await fetch(urls[section]);
+    const data = await res.json();
+
+    if (!data.results.length || state.page >= data.total_pages) {
+      state.hasMore = false;
+    }
+
+    if (section === "trending") tMovies.push(...data.results);
+    if (section === "upcoming") uMovies.push(...data.results);
+    if (section === "comedy") cMovies.push(...data.results);
+    if (section === "horror") hMovies.push(...data.results);
+
+    const containers = { trending, upcoming, comedy, horror };
+    await appendMovies(data.results, containers[section]);
+  } catch (err) {
+    console.error(`Failed to load more ${section}:`, err);
+    state.page--;
+  } finally {
+    state.loading = false;
   }
 }
 
 // Gets the US content certification for a movie (PG-13, R, etc.).
 async function getCertification(movieId) {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/${movieId}/release_dates?api_key=${API_KEY}`,
-    );
+    const response = await fetch(`${BASE_URL}/movie/${movieId}/release_dates?api_key=${API_KEY}`);
     const data = await response.json();
 
     const usRelease = data.results.find((r) => r.iso_3166_1 === "US");
@@ -185,23 +273,21 @@ async function getCertification(movieId) {
   }
 }
 
-// Builds movie cards for a section and wires the details modal action.
-async function displayMovies(movies, count, container) {
-  container.innerHTML = "";
+async function appendMovies(movies, container) {
+  const moviesWithPosters = movies.filter((m) => m.poster_path !== null);
+  const seen = getSeenSet(container);
 
-  const moviesWithPosters = movies.filter(
-    (movie) => movie.poster_path !== null,
-  );
-  const certs = await Promise.all(
-    moviesWithPosters.map((movie) => getCertification(movie.id)),
-  );
-  const genreRes = await fetch(
-    `${BASE_URL}/genre/movie/list?api_key=${API_KEY}`,
-  );
+  const certs = await Promise.all(moviesWithPosters.map((movie) => getCertification(movie.id)));
+
+  const genreRes = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}`);
   const genreData = await genreRes.json();
   const genres = genreData.genres;
 
-  moviesWithPosters.slice(0, count).forEach((movie, index) => {
+  moviesWithPosters.forEach((movie, index) => {
+    if (seen.has(movie.id)) {
+      return;
+    }
+    seen.add(movie.id);
     const cert = certs[index];
     const movieGenres = movie.genre_ids.map((id) => {
       const genre = genres.find((g) => g.id === id);
@@ -215,6 +301,63 @@ async function displayMovies(movies, count, container) {
     title.textContent = movie.title;
 
     const card = document.createElement("div");
+    card.dataset.movieId = String(movie.id);
+    const link = document.createElement("a");
+    link.href = MOVIE_URL + movie.id;
+    link.target = "_blank";
+
+    const viewDetailsBtn = document.createElement("button");
+    viewDetailsBtn.classList.add("view-details-btn");
+    viewDetailsBtn.type = "button";
+    viewDetailsBtn.textContent = "View Details";
+
+    const post = document.createElement("div");
+    link.appendChild(img);
+    post.appendChild(link);
+    post.appendChild(title);
+    post.appendChild(viewDetailsBtn);
+    card.appendChild(post);
+
+    container.appendChild(card);
+
+    viewDetailsBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openMovieModal(movie, cert, movieGenres);
+    });
+  });
+}
+
+// Builds movie cards for a section and wires the details modal action.
+async function displayMovies(movies, container) {
+  container.innerHTML = "";
+  seenByContainer.set(container, new Set());
+
+  const moviesWithPosters = movies.filter((movie) => movie.poster_path !== null);
+  const certs = await Promise.all(moviesWithPosters.map((movie) => getCertification(movie.id)));
+  const genreRes = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}`);
+  const genreData = await genreRes.json();
+  const genres = genreData.genres;
+
+  const seen = getSeenSet(container);
+  moviesWithPosters.forEach((movie, index) => {
+    if (seen.has(movie.id)) {
+      return;
+    }
+    seen.add(movie.id);
+    const cert = certs[index];
+    const movieGenres = movie.genre_ids.map((id) => {
+      const genre = genres.find((g) => g.id === id);
+      return genre ? genre.name : "";
+    });
+
+    const img = document.createElement("img");
+    img.src = POSTER_URL + movie.poster_path;
+
+    const title = document.createElement("p");
+    title.textContent = movie.title;
+
+    const card = document.createElement("div");
+    card.dataset.movieId = String(movie.id);
 
     const link = document.createElement("a");
     link.href = MOVIE_URL + movie.id;
@@ -260,9 +403,7 @@ async function fetchSuggestions() {
     return;
   }
   try {
-    const response = await fetch(
-      `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}`,
-    );
+    const response = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}`);
     const data = await response.json();
 
     const results = data.results
@@ -299,67 +440,56 @@ async function fetchSuggestions() {
 
 // Executes movie search and shows results grid.
 async function searchMovies() {
-  query = searchBox.value;
+  const q = searchBox.value.trim();
+  if (!q) {
+    hideSearchLoader();
+    return;
+  }
+
+  pageState.search.query = q;
+  pageState.search.page = 1;
+  pageState.search.hasMore = true;
+
+  hideSuggestions();
+  showSearchLoader();
+  clearAll();
+  searchMov.innerHTML = "";
+  searchH3.innerHTML = `Search for ${q}`;
+  await delay(250);
+  await fetchMoreSearch();
+}
+
+async function fetchMoreSearch() {
+  const state = pageState.search;
+  if (state.loading || !state.hasMore) return;
+
+  state.loading = true;
+  showSearchLoader();
+
   try {
-    if (query === " ") return;
-    const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const res = await fetch(
+      `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${state.query}&page=${state.page}`,
+    );
+    const data = await res.json();
+
+    if (!data.results.length || state.page >= data.total_pages) {
+      state.hasMore = false;
     }
-    const data = await response.json();
+
     const results = data.results.filter(
-      (result) => result.poster_path !== null && result.title !== null,
+      (r) => r.poster_path !== null && r.title !== null,
     );
 
-    clearAll();
-    if (searchBox.value.length === 0) {
-      searchMov.innerHTML = "<p>No movies found. Try a different search.</p>";
-      return;
-    } else {
-      searchMov.innerHTML = "";
-    }
-
-    searchH3.innerHTML = `Search for ${searchBox.value}:`;
-
-    for (const result of results) {
-      const img = document.createElement("img");
-      img.src = POSTER_URL + result.poster_path;
-      const title = document.createElement("p");
-      title.textContent = result.title;
-      const div = document.createElement("div");
-      const link = document.createElement("a");
-      link.href = MOVIE_URL + result.id;
-      link.target = "_blank";
-
-      link.appendChild(img);
-      div.appendChild(link);
-      div.appendChild(title);
-      searchMov.appendChild(div);
-    }
+    await appendMovies(results, searchMov);
+    state.page++;
   } catch (error) {
     console.error("Search failed:", error);
     searchMov.innerHTML = "<p>Search failed. Please try again.</p>";
+  } finally {
+    state.loading = false;
+    hideSearchLoader();
   }
 }
-
-// "Show more" handlers per section.
-document.getElementById("show-more-trending").addEventListener("click", () => {
-  tVisible += 6;
-  displayMovies(getFilteredMovies(tMovies), tVisible, trending);
-});
-document.getElementById("show-more-upcoming").addEventListener("click", () => {
-  uVisible += 6;
-  displayMovies(getFilteredMovies(uMovies), uVisible, upcoming);
-});
-document.getElementById("show-more-comedy").addEventListener("click", () => {
-  cVisible += 6;
-  displayMovies(getFilteredMovies(cMovies), cVisible, comedy);
-});
-document.getElementById("show-more-horror").addEventListener("click", () => {
-  hVisible += 6;
-  displayMovies(getFilteredMovies(hMovies), hVisible, horror);
-});
 
 // Search form submit runs a full search.
 searchForm.addEventListener("submit", (e) => {
@@ -368,10 +498,7 @@ searchForm.addEventListener("submit", (e) => {
 });
 
 // Input event uses debounced suggestions endpoint.
-searchBox.addEventListener(
-  "input",
-  debounce(fetchSuggestions, 300),
-);
+searchBox.addEventListener("input", debounce(fetchSuggestions, 300));
 
 // Clicking outside search form closes suggestions dropdown.
 document.addEventListener("click", (e) => {
@@ -379,6 +506,27 @@ document.addEventListener("click", (e) => {
     document.getElementById("suggestions").style.display = "none";
   }
 });
+
+function setupInfiniteScroll(section, container) {
+  const sentinel = document.createElement("div");
+  sentinel.className = "scroll-sentinel";
+  container.appendChild(sentinel);
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        fetchMoreMovies(section);
+      }
+    },
+    {
+      root: container,
+      rootMargin: "0px 400px 0px 0px",
+      threshold: 0,
+    },
+  );
+
+  observer.observe(sentinel);
+}
 
 // Hide category rows while search results are displayed.
 function clearAll() {
@@ -388,17 +536,17 @@ function clearAll() {
   H.style.display = "none";
 }
 
-// Restore all category rows (kept for reuse).
-function showAll() {
-  T.style.display = "block";
-  U.style.display = "block";
-  C.style.display = "block";
-  H.style.display = "block";
-}
-
 // Initial app boot.
 loadMovies();
 
-
-
-
+const searchSentinel = document.getElementById("search-sentinel");
+if (searchSentinel) {
+  new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        fetchMoreSearch();
+      }
+    },
+    { threshold: 0.1 },
+  ).observe(searchSentinel);
+}
